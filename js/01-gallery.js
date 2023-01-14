@@ -1,13 +1,13 @@
 import { galleryItems } from './gallery-items.js';
 // Change code below this line
-console.log(galleryItems);
+// console.log(galleryItems);
 
 const galleryImages = document.querySelector('.gallery');
-
+const bodyForGallery = document.body;
 
 const galleryMarkup = createGalleryPictures (galleryItems);
 galleryImages.insertAdjacentHTML("beforeend",galleryMarkup);
-// galleryImages.addEventListener('click', onClick());
+
 
 function createGalleryPictures (images) {
     return images.map(({preview,original,description}) => {
@@ -23,37 +23,39 @@ function createGalleryPictures (images) {
         </div>`}).join(" ")};
 
 
-// function onClick (e) {
-//     e.preventDefault();
-// const image = e.target.classList.contains("gallery")
-// if(!image){
-//     return;
-// }};
-
-// function openModal () {
-//     const instance = basicLightbox.create(`
-//     <img src="${original}">
-// `)
-
-// instance.show()
-// }
-
-galleryImages.addEventListener('click', onGalleryItemClick);
-
-function onGalleryItemClick(e){
-    e.preventDefault();
-
-    if(e.target.nodeName !== 'IMG'){
-        return
+const createModalWindow = (imageSrc) => {
+window.instance = basicLightbox.create(
+    ` <img src='${imageSrc}'/> `,
+    {
+    onShow: () =>
+        window.addEventListener("keydown", closeModaEsc),
+    onClose: () => {
+        window.removeEventListener("keydown", closeModaEsc);
+        bodyForGallery.classList.remove("disable-scroll");
+        },
     }
+    );
+    return instance;
+};
 
-const instance = basicLightbox.create(`
-    <div class="modal">
-    <img src='${e.target.dataset.source}'>
-    </div>
-`)
 
-instance.show()
-}
+galleryImages.addEventListener('click', openImgOnModal);
 
+
+function openImgOnModal(event) {
+        event.preventDefault();
+    if (!event.target.classList.contains("gallery__image")) {
+        return;
+    };
+    createModalWindow(event.target.dataset.source).show();
+    bodyForGallery.classList.add("disable-scroll");
+
+    };
+
+function closeModaEsc(event) {
+        if (event.code === "Escape" && instance.visible()) {
+        instance.close();
+        bodyForGallery.classList.remove("disable-scroll");
+        };
+};
 
